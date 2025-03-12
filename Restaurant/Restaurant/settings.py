@@ -10,6 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os 
+# Clés Stripe
+STRIPE_SECRET_KEY = "sk_test_51QInRoGogRjFhs0RtEGNWWHe053fmIwdQDs41ohqzDIgb3ou2Zpd1vPrrtUneQJ3cKrVaN6crKMKmkzm3uJOgKo600h3TXCQnQ"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51QInRoGogRjFhs0RPTkgNt6XU11LPJ75inCYEz4Aqjc7KlVO6IltzH2xTL81EAnlpxts8tUymomLxWucbEuy31Yp004bk33NxP"
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,7 +42,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "categorie",
-    "products"
+    "products",
+    "cart",
+    "payments"
 ]
 
 MIDDLEWARE = [
