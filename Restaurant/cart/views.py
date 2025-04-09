@@ -1,51 +1,92 @@
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from .models import Products, Cart
-from django.shortcuts import get_object_or_404, redirect
-from django.core.serializers import serialize
-def product_list(request):
-    products = Products.objects.all()
-    return render(request, 'browsing.html', {'products': products})
-
-def view_cart(request):
-    cart_items = Cart.objects.all()
-    total_price = sum(item.product.price * item.quantity for item in
-    cart_items)
-    return render(request, 'cart.html', {'cart_items': cart_items,
-    'total_price': total_price})
-def add_to_cart(request, product_id):
-    product = Products.objects.get(id=product_id)
-    cart_item, created = Cart.objects.get_or_create(product=product)
-    if product.qtestock > cart_item.quantity:
-        cart_item.quantity += 1
-        cart_item.save()
-        return redirect('cart:view_cart')
-    else:
-        messages.error(request, "Stock insuffisant pour ajouter ce produit au panier.")
-        return redirect('cart:view_cart')
-def remove_from_cart(request, item_id):
-    cart_item = Cart.objects.get(id=item_id)
-    cart_item.delete()
-    return redirect('cart:view_cart')
-def add_qty(request, product_id):
-    product = get_object_or_404(Products, id=product_id)
-    cart_item, created = Cart.objects.get_or_create(product=product)
-    if product.qtestock > cart_item.quantity:
-        cart_item.quantity += 1
-        cart_item.save()
-        return redirect('cart:view_cart')
-    else:
-        messages.error(request, "Stock insuffisant pour ajouter ce produit au panier.")
-        return redirect('cart:view_cart')
-
-def sub_qty(request, product_id):
-    product = get_object_or_404(Products, id=product_id)
-    cart_item, created = Cart.objects.get_or_create(product=product)
-    if cart_item.quantity > 1:
-        cart_item.quantity -= 1
-        cart_item.save()
-        return redirect('cart:view_cart')
-    else:
-        messages.warning(request, "La quantité ne peut pas être inférieure à 1.")
-
-        return redirect('cart:view_cart')
+from django.contrib import messages 
+from django.shortcuts import render, redirect 
+from .models import Products, Cart 
+from django.shortcuts import get_object_or_404, redirect 
+from django.contrib.auth.decorators import login_required 
+ 
+ 
+def product_list(request): 
+    products = Products.objects.all() 
+    return render(request, 'browsing.html', {'products': products}) 
+ 
+@login_required 
+def view_cart(request): 
+    # Filtrer les articles de panier de l'utilisateur connecté 
+    cart_items = Cart.objects.filter(user=request.user, status=False) 
+    total_price = sum(item.product.price * item.quantity for item in 
+cart_items) 
+    return render(request, 'cart.html', {'cart_items': cart_items, 
+'total_price': total_price}) 
+ 
+@login_required 
+def add_to_cart(request, product_id): 
+    product = get_object_or_404(Products, id=product_id) 
+     
+    # Récupérer ou créer un élément du panier pour cet utilisateur et ce produit 
+    cart_item, created = Cart.objects.get_or_create( 
+        product=product, 
+        user=request.user, 
+        status=False  # Panier en cours (non payé) 
+    ) 
+     
+    # Vérification du stock 
+    if product.qtestock > cart_item.quantity: 
+        cart_item.quantity += 1 
+        cart_item.save() 
+        messages.success(request, "Produit ajouté au panier.") 
+    else: 
+        messages.error(request, "Stock insuffisant pour ajouter ce produit au panier.") 
+     
+    return redirect('cart:view_cart') 
+ 
+def remove_from_cart(request, item_id): 
+    # Make sure to filter properly to avoid issues 
+    try: 
+        cart_item = Cart.objects.get(id=item_id, user=request.user, 
+status=False) 
+        cart_item.delete() 
+        return redirect('cart:view_cart') 
+    except Cart.DoesNotExist: 
+        messages.error(request, "L'article n'existe pas dans votre panier.") 
+        return redirect('cart:view_cart') 
+ 
+@login_required 
+ 
+ 
+def add_qty(request, product_id): 
+    product = get_object_or_404(Products, id=product_id) 
+     
+    # Get the cart item or return the first one if multiple exist (optional, but be careful here) 
+    cart_item = Cart.objects.filter(product=product, user=request.user, status=False).first() 
+ 
+    if cart_item:  # Check if the cart item exists 
+        if product.qtestock > cart_item.quantity: 
+            cart_item.quantity += 1 
+            cart_item.save() 
+            return redirect('cart:view_cart') 
+        else: 
+            messages.error(request, "Stock insuffisant pour ajouter ce produit au panier.") 
+    else: 
+        messages.error(request, "Produit non trouvé dans le panier.") 
+         
+    return redirect('cart:view_cart') 
+     
+ 
+@login_required 
+def sub_qty(request, product_id): 
+    product = get_object_or_404(Products, id=product_id) 
+     
+    # Get the cart item or return the first one if multiple exist (optional) 
+    cart_item = Cart.objects.filter(product=product, user=request.user, status=False).first() 
+ 
+    if cart_item:  # Check if the cart item exists 
+        if cart_item.quantity > 1: 
+            cart_item.quantity -= 1 
+            cart_item.save() 
+            return redirect('cart:view_cart') 
+        else: 
+            messages.warning(request, "La quantité ne peut pas être inférieure à 1.") 
+    else: 
+        messages.error(request, "Produit non trouvé dans le panier.") 
+     
+    return redirect('cart:view_cart') 

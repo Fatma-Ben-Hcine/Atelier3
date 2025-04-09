@@ -13,6 +13,8 @@ import os
 # Clés Stripe
 STRIPE_SECRET_KEY = "sk_test_51QInRoGogRjFhs0RtEGNWWHe053fmIwdQDs41ohqzDIgb3ou2Zpd1vPrrtUneQJ3cKrVaN6crKMKmkzm3uJOgKo600h3TXCQnQ"
 STRIPE_PUBLISHABLE_KEY = "pk_test_51QInRoGogRjFhs0RPTkgNt6XU11LPJ75inCYEz4Aqjc7KlVO6IltzH2xTL81EAnlpxts8tUymomLxWucbEuy31Yp004bk33NxP"
+LOGIN_URL = 'login' 
+LOGIN_REDIRECT_URL = 'cart:view_cart' 
 
 from pathlib import Path
 

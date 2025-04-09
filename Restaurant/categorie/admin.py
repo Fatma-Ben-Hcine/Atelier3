@@ -7,6 +7,7 @@ class CategorieAdmin(admin.ModelAdmin):
     def image_preview(self, obj): 
         if obj.imageCat:  # Vérifie si une image est disponible 
             return format_html('<img src="{}" style="width: 50px; height: 50px;" />', obj.imageCat) 
-        return "Pas d'image"  # Message si aucune image n'est définie image_preview.short_description = "Image"  # Intitulé de la colonne dans l'admin 
+        return "Pas d'image"  # Message si aucune image n'est définie 
+    image_preview.short_description = "Image"  # Intitulé de la colonne dans l'admin 
 # Enregistrement du modèle Categorie dans l'admin avec la configuration CategorieAdmin 
 admin.site.register(Categorie, CategorieAdmin) 

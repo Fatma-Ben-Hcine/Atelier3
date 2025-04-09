@@ -29,11 +29,9 @@ rel="stylesheet">
 alt="image"/></p>
 <p>
 {{ item.product.title }}
-<a class="changeQty-button" href="{% url 'cart:sub_qty'
-item.product.id %}">-</a>
+<a class="changeQty-button" href="{% url 'cart:sub_qty' item.product.id %}">-</a>
 ({{ item.quantity }})
-<a class="changeQty-button" href="{% url 'cart:add_qty'
-item.product.id %}">+</a>
+<a class="changeQty-button" href="{% url 'cart:add_qty' item.product.id %}">+</a>
 </p>
 <p>Price: {{ item.product.price }} TND</p>
 
